@@ -1,4 +1,5 @@
-To run the project you need to install Django & Pillow library.
+To run the project you need to install these library:
+pip install -r requirements.txt
 
 After that, Run these commands:
 # 1. Apply migrations (creates the DB tables)

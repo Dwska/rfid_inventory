@@ -1,0 +1,37 @@
+{% extends 'inventory/base.html' %}
+{% block title %}Transaction Log{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Transaction Log</h1>
+  <p>All checkout events recorded by this terminal.</p>
+</div>
+<div class="card">
+  {% if transactions %}
+  <table class="table">
+    <thead>
+      <tr><th>Date / Time</th><th>User</th><th>RFID</th><th>Items</th></tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td style="color: #78716c; white-space: nowrap; font-size: 12px;">
+          {{ t.checked_out_at|date:"d M Y, H:i" }}
+        </td>
+        <td>{{ t.rfid_user.full_name }}</td>
+        <td><span class="badge badge-blue">{{ t.rfid_user.rfid_code }}</span></td>
+        <td>
+          {% for item in t.items.all %}
+            <span class="badge badge-green" style="margin-right: 4px; margin-bottom: 4px;">
+              {{ item.product_name_snapshot }} ×{{ item.quantity }}
+            </span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="empty-state">No transactions recorded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

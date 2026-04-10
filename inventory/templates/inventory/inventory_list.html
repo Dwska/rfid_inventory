@@ -1,0 +1,43 @@
+{% extends 'inventory/base.html' %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h1>Inventory</h1>
+    <p>Click any product to take items.</p>
+  </div>
+  <a href="{% url 'cart' %}" class="btn btn-primary">
+    🛒 Cart{% if cart_count %} ({{ cart_count }}){% endif %}
+  </a>
+</div>
+
+<form method="get" style="margin-bottom: 1.25rem; display: flex; gap: 8px;">
+  <input type="text" name="q" value="{{ search }}" placeholder="Search products..."
+    style="flex: 1; padding: 9px 12px; border: 1px solid #e7e5e4; border-radius: 8px; font-size: 13px;">
+  <button type="submit" class="btn">Search</button>
+  {% if search %}<a href="{% url 'inventory_list' %}" class="btn">Clear</a>{% endif %}
+</form>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+  {% for p in products %}
+  <a href="{% url 'product_detail' p.pk %}" style="display: block;">
+    <div class="card card-sm" style="height: 100%; transition: border-color 0.15s;"
+         onmouseover="this.style.borderColor='#a8a29e'" onmouseout="this.style.borderColor='#e7e5e4'">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <h3 style="font-size: 14px; font-weight: 500;">{{ p.name }}</h3>
+        <span class="badge {% if p.stock_status == 'critical' %}badge-red{% elif p.stock_status == 'low' %}badge-yellow{% else %}badge-green{% endif %}">
+          {% if p.stock_status == 'critical' %}Critical{% elif p.stock_status == 'low' %}Low{% else %}OK{% endif %}
+        </span>
+      </div>
+      <div style="font-size: 12px; color: #78716c;">{{ p.category.name }} · {{ p.location }}</div>
+      <div style="font-size: 13px; font-weight: 500; margin-top: 8px;">{{ p.stock }} / {{ p.max_stock }}</div>
+      <div class="stock-bar">
+        <div class="stock-fill fill-{{ p.stock_status }}" style="width: {{ p.stock_percentage }}%;"></div>
+      </div>
+    </div>
+  </a>
+  {% empty %}
+    <div class="empty-state" style="grid-column: 1 / -1;">No products found.</div>
+  {% endfor %}
+</div>
+{% endblock %}

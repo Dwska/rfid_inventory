@@ -1,0 +1,45 @@
+{% extends 'inventory/base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div style="max-width: 520px; margin: 0 auto;">
+  <div style="margin-bottom: 1rem;">
+    <a href="{% url 'inventory_list' %}" style="font-size: 13px; color: #78716c;">← Back to Inventory</a>
+  </div>
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <h1 style="font-size: 20px; font-weight: 600;">{{ product.name }}</h1>
+      <span class="badge {% if product.stock_status == 'critical' %}badge-red{% elif product.stock_status == 'low' %}badge-yellow{% else %}badge-green{% endif %}">
+        {{ product.stock_status|title }}
+      </span>
+    </div>
+    <p style="color: #78716c; font-size: 14px; margin-bottom: 1.25rem;">{{ product.description }}</p>
+
+    <table class="table" style="margin-bottom: 1.25rem;">
+      <tr><td style="color: #78716c;">Category</td><td>{{ product.category.name }}</td></tr>
+      <tr><td style="color: #78716c;">Location</td><td>{{ product.location }}</td></tr>
+      <tr><td style="color: #78716c;">In stock</td><td><strong>{{ product.stock }}</strong> / {{ product.max_stock }}</td></tr>
+      {% if in_cart %}<tr><td style="color: #78716c;">Already in cart</td><td>{{ in_cart }} units</td></tr>{% endif %}
+    </table>
+
+    <div class="stock-bar" style="margin-bottom: 1.5rem;">
+      <div class="stock-fill fill-{{ product.stock_status }}" style="width: {{ product.stock_percentage }}%;"></div>
+    </div>
+
+    {% if product.stock > 0 %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Quantity to take</label>
+        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}"
+          style="width: 100%; padding: 9px 12px; border: 1px solid #e7e5e4; border-radius: 8px; font-size: 14px;">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+        Add to Cart
+      </button>
+    </form>
+    {% else %}
+      <div class="alert alert-error">This item is out of stock.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

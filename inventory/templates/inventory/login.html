@@ -1,0 +1,35 @@
+{% extends 'inventory/base.html' %}
+{% block title %}RFID Login{% endblock %}
+{% block content %}
+<div style="max-width: 420px; margin: 4rem auto;">
+  <div class="card">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <div style="font-size: 40px; margin-bottom: 8px;">🔒</div>
+      <h1 style="font-size: 20px; font-weight: 600;">Inventory Access</h1>
+      <p style="color: #78716c; font-size: 13px; margin-top: 4px;">
+        Tap your RFID card
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>RFID Card</label>
+        {{ form.rfid_code }}
+        {% if form.rfid_code.errors %}
+          <div class="form-error">{{ form.rfid_code.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+        Scan &amp; Unlock
+      </button>
+    </form>
+
+    <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 1.25rem 0;">
+    <p style="font-size: 12px; color: #a8a29e; text-align: center;">
+      Only registered RFID users can access this terminal.
+      <br>Contact your admin to register a new card.
+    </p>
+  </div>
+</div>
+{% endblock %}

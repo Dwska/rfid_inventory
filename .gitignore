@@ -1,0 +1,10 @@
+# Environments
+.env
+.venv
+.vscode
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]

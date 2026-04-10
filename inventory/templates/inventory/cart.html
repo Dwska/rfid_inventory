@@ -1,0 +1,60 @@
+{% extends 'inventory/base.html' %}
+{% block title %}Cart{% endblock %}
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div><h1>Your Cart</h1><p>Review before checking out.</p></div>
+  <a href="{% url 'inventory_list' %}" class="btn">+ Add more</a>
+</div>
+
+{% if cart_items %}
+<div class="card" style="margin-bottom: 1rem;">
+  <table class="table">
+    <thead>
+      <tr><th>Product</th><th>Location</th><th>Qty</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in cart_items %}
+      <tr>
+        <td>
+          <a href="{% url 'product_detail' item.product.pk %}" style="font-weight: 500;">
+            {{ item.product.name }}
+          </a>
+          <div style="font-size: 11px; color: #78716c;">{{ item.product.category.name }}</div>
+        </td>
+        <td style="color: #78716c; font-size: 13px;">{{ item.product.location }}</td>
+        <td>
+          <form method="post" style="display: inline-flex; align-items: center; gap: 6px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="product_id" value="{{ item.product.pk }}">
+            <input type="number" name="quantity" value="{{ item.qty }}"
+              min="1" max="{{ item.product.stock }}"
+              style="width: 60px; padding: 5px 8px; border: 1px solid #e7e5e4; border-radius: 6px; font-size: 13px;">
+            <button type="submit" class="btn btn-sm">Update</button>
+          </form>
+        </td>
+        <td>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="product_id" value="{{ item.product.pk }}">
+            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div style="display: flex; justify-content: flex-end;">
+  <a href="{% url 'checkout' %}" class="btn btn-success" style="padding: 10px 24px; font-size: 14px;">
+    Confirm Checkout →
+  </a>
+</div>
+{% else %}
+  <div class="card empty-state">
+    🛒 Your cart is empty.<br><br>
+    <a href="{% url 'inventory_list' %}" class="btn btn-primary" style="margin-top: 8px;">Browse Inventory</a>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'inventory/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Hello, {{ rfid_user.full_name.split.0 }}! 👋</h1>
+  <p>{{ rfid_user.role|title }} · {{ rfid_user.department }} · {{ rfid_user.rfid_code }}</p>
+</div>
+
+<div class="grid-3" style="margin-bottom: 1.5rem;">
+  <div class="metric-card">
+    <div class="metric-label">Total Products</div>
+    <div class="metric-value">{{ total_products }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Low / Critical Stock</div>
+    <div class="metric-value" style="color: #ca8a04;">{{ low_stock_count }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Items in Cart</div>
+    <div class="metric-value" style="color: #1d4ed8;">{{ cart_count }}</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2 style="font-size: 15px; font-weight: 600; margin-bottom: 1rem;">Quick Actions</h2>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <a href="{% url 'inventory_list' %}" class="btn" style="justify-content: flex-start;">
+        📦 Browse Inventory
+      </a>
+      <a href="{% url 'cart' %}" class="btn" style="justify-content: flex-start;">
+        🛒 View Cart{% if cart_count %} ({{ cart_count }}){% endif %}
+      </a>
+      <a href="{% url 'transaction_log' %}" class="btn" style="justify-content: flex-start;">
+        📋 Transaction Log
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 15px; font-weight: 600; margin-bottom: 1rem;">
+      Low Stock Alerts
+    </h2>
+    {% if low_stock_items %}
+      {% for p in low_stock_items %}
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f4;">
+        <div>
+          <div style="font-size: 13px; font-weight: 500;">{{ p.name }}</div>
+          <div style="font-size: 11px; color: #78716c;">{{ p.location }}</div>
+        </div>
+        <span class="badge {% if p.stock_status == 'critical' %}badge-red{% else %}badge-yellow{% endif %}">
+          {{ p.stock }} left
+        </span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding: 1.5rem;">All stock levels healthy ✓</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top: 1rem;">
+  <h2 style="font-size: 15px; font-weight: 600; margin-bottom: 1rem;">Recent Transactions</h2>
+  {% if recent_transactions %}
+  <table class="table">
+    <thead>
+      <tr><th>User</th><th>RFID</th><th>Date / Time</th></tr>
+    </thead>
+    <tbody>
+      {% for t in recent_transactions %}
+      <tr>
+        <td>{{ t.rfid_user.full_name }}</td>
+        <td><span class="badge badge-blue">{{ t.rfid_user.rfid_code }}</span></td>
+        <td style="color: #78716c;">{{ t.checked_out_at|date:"d M Y, H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="empty-state">No transactions yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

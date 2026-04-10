@@ -1,0 +1,32 @@
+{% extends 'inventory/base.html' %}
+{% block title %}Confirm Checkout{% endblock %}
+{% block content %}
+<div style="max-width: 520px; margin: 0 auto;">
+  <div class="card">
+    <h1 style="font-size: 18px; font-weight: 600; margin-bottom: 0.5rem;">Confirm Checkout</h1>
+    <p style="color: #78716c; font-size: 13px; margin-bottom: 1.25rem;">
+      These items will be deducted from inventory permanently.
+    </p>
+    <table class="table" style="margin-bottom: 1.25rem;">
+      <thead><tr><th>Product</th><th>Quantity</th></tr></thead>
+      <tbody>
+        {% for item in cart_items %}
+        <tr>
+          <td>{{ item.0.name }}</td>
+          <td>{{ item.1 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div style="display: flex; gap: 8px;">
+      <a href="{% url 'cart' %}" class="btn" style="flex: 1; justify-content: center;">← Back</a>
+      <form method="post" style="flex: 1;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">
+          Confirm &amp; Checkout
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

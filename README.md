@@ -15,3 +15,4 @@ python manage.py migrate
 
 ## 4. Start the development server
 `python manage.py runserver`
+To log in, type one of the seeded RFID codes: RFID-A1B2, RFID-C3D4, or RFID-E5F6.

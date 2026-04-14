@@ -1,35 +1,120 @@
 {% extends 'inventory/base.html' %}
 {% block title %}RFID Login{% endblock %}
 {% block content %}
-<div style="max-width: 420px; margin: 4rem auto;">
+<div style="max-width: 440px; margin: 4rem auto;">
   <div class="card">
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-      <div style="font-size: 40px; margin-bottom: 8px;">🔒</div>
-      <h1 style="font-size: 20px; font-weight: 600;">Inventory Access</h1>
-      <p style="color: #78716c; font-size: 13px; margin-top: 4px;">
-        Tap your RFID card
+    <div style="text-align:center; margin-bottom:1.5rem;">
+      <div style="font-size:44px; margin-bottom:10px;" id="scan-icon">📡</div>
+      <h1 style="font-size:20px; font-weight:600;">Inventory Terminal</h1>
+      <p style="color:#78716c; font-size:13px; margin-top:4px;" id="scan-status">
+        Waiting for RFID card...
       </p>
     </div>
 
-    <form method="post">
+    {% if request.method == "POST" and error %}
+    <div style="background:#fee2e2; color:#b91c1c; border-radius:8px;
+                padding:10px 14px; font-size:13px; margin-bottom:1rem;
+                display:flex; align-items:center; gap:8px;">
+      <span>❌</span> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" id="rfid-form">
       {% csrf_token %}
       <div class="form-group">
-        <label>RFID Card</label>
-        {{ form.rfid_code }}
+        <label style="font-size:12px; color:#78716c;">RFID Card Code</label>
+        <input
+          type="text"
+          name="rfid_code"
+          id="rfid-input"
+          autocomplete="off"
+          placeholder="Tap card or type code here..."
+          style="letter-spacing:2px; font-family:monospace; font-size:15px;"
+        >
         {% if form.rfid_code.errors %}
           <div class="form-error">{{ form.rfid_code.errors.0 }}</div>
         {% endif %}
       </div>
-      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-        Scan &amp; Unlock
+      <button type="submit" class="btn btn-primary"
+              style="width:100%; justify-content:center; padding:10px;">
+        Unlock →
       </button>
     </form>
 
-    <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 1.25rem 0;">
-    <p style="font-size: 12px; color: #a8a29e; text-align: center;">
-      Only registered RFID users can access this terminal.
-      <br>Contact your admin to register a new card.
-    </p>
+    <hr style="border:none; border-top:1px solid #e7e5e4; margin:1.25rem 0;">
+
+    <div style="font-size:12px; color:#a8a29e; text-align:center; line-height:1.7;">
+      Hold your RFID card near the scanner.<br>
+      The terminal will unlock automatically.<br>
+      Unauthorized access is logged.
+    </div>
   </div>
 </div>
+
+<script>
+(function () {
+  const input  = document.getElementById('rfid-input');
+  const form   = document.getElementById('rfid-form');
+  const icon   = document.getElementById('scan-icon');
+  const status = document.getElementById('scan-status');
+
+  // ── Always keep input focused (kiosk behavior) ──
+  function refocus() { input.focus(); }
+  document.addEventListener('click',   refocus);
+  document.addEventListener('keydown', refocus);
+  input.addEventListener('blur', () => setTimeout(refocus, 1000)); //1 second for "Focus Lock"
+  refocus();
+
+  // ── Detect RFID scan (fast machine input ending with Enter) ──
+  let timer   = null;
+
+  input.addEventListener('keydown', function (e) {
+
+    // Enter key = reader finished typing the card ID
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const val = input.value.trim();
+      if (val.length >= 4) {
+        icon.textContent   = '🔄';
+        status.textContent = 'Verifying card with database...';
+        input.ariaReadOnly     = true;
+        form.submit();
+      }
+      return;
+    }
+
+    // Visual feedback as reader starts typing
+    if (input.value.length === 0) {
+      icon.textContent   = '⚡';
+      status.textContent = 'Reading card...';
+    }
+
+    // RFID readers type all characters in < 50ms per keystroke.
+    // If input looks complete after a pause, auto-submit.
+    // clearTimeout(timer);
+    // timer = setTimeout(function () {
+    //   const val = input.value.trim();
+    //   if (val.length >= 6) {
+    //     icon.textContent   = '🔄';
+    //     status.textContent = 'Verifying card with database...';
+    //     input.ariaReadOnly     = true;
+    //     form.submit();
+    //   }
+    // }, 200); // 200 miliseconds before the input loop
+  });
+
+  // Reset icon if an error was shown on page load
+  {% if error %}
+  icon.textContent   = '❌';
+  status.textContent = 'Access denied. Try another card.';
+  setTimeout(function () {
+    icon.textContent   = '📡';
+    status.textContent = 'Waiting for RFID card...';
+    input.ariaReadOnly     = false;
+    input.value            = '';
+    refocus();
+  }, 1000);
+  {% endif %}
+})();
+</script>
 {% endblock %}

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'inventory', # Our app
+    'inventory', # our app
 ]
 
 MIDDLEWARE = [
@@ -73,16 +73,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'rfid_inventory.wsgi.application'
-
-
-# Database — SQLite for development
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ── Use WSGI, not ASGI ─────────────────────────────────────────────────────
+WSGI_APPLICATION = 'rfid_inventory.wsgi.application'  # This is the default
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     'rfid_inventory',    # DB name you created
+        'USER':     os.getenv('DB_USER'),         # DB user you created
+        'PASSWORD': os.getenv('DB_PWD'),      # Password you set
+        'HOST':     'localhost',
+        'PORT':     '5432',
     }
 }
 
@@ -132,3 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+
+# Session expires when browser closes (important for kiosk/tablet use)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600  # 1 hour max regardless

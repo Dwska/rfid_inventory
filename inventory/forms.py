@@ -1,26 +1,26 @@
 from django import forms
-from .models import RFIDUser
 
 
 class RFIDLoginForm(forms.Form):
-    """
-    Simulates RFID card scan — in production, the RFID reader
-    posts the card ID directly to this endpoint.
-    """
     rfid_code = forms.CharField(
-        max_length=50,
+        max_length=100,
         label="RFID Card Code",
         widget=forms.TextInput(attrs={
-            'placeholder': 'Scan RFID card',
-            'autofocus': True,
-            'class': 'rfid-input',
+            'placeholder':  'Scan RFID card or type code...',
+            'autofocus':    True,
+            'autocomplete': 'off',
+            'id':           'rfid-input',
         })
     )
 
     def clean_rfid_code(self):
+        # Strip whitespace, newlines, carriage returns the reader might append
         code = self.cleaned_data['rfid_code'].strip().upper()
-        try:
-            user = RFIDUser.objects.get(rfid_code=code, is_active=True)
-        except RFIDUser.DoesNotExist:
-            raise forms.ValidationError("RFID card not recognized or access revoked.")
+
+        # Remove any non-printable characters (some readers append \r or \x00)
+        code = ''.join(c for c in code if c.isprintable())
+
+        if len(code) < 4:
+            raise forms.ValidationError("Card code too short — minimum 4 characters.")
+
         return code
